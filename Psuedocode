@@ -1,9 +1,39 @@
 #Psuedocode for the drone
 
-# Startup
-
-# Object Tracking
-
-# Collision Avoidance
-
-# Shutdown
+# Algorithm organization
+  #Finite state machine
+    # States: Start(), Tracking(), Avoid(), Land()
+    
+  #Interrupt threads
+  
+#Startup
+  #Confirm all sensors present/working
+  #Initialize sensors
+  #Initialize ground robot tracking camera
+  #Calibrate ground robot tracking camera? 
+     #(possible difficulties as no floor reference?)
+  #Check motors?
+     #(unsure if possible?)
+  #Zero height sensor
+  #Check proximity sensors
+  #OK to fly
+  #Rise to predetermined altitude
+  
+#Tracking
+  #Detect april tag
+  #Ground robot tracking
+  #Check battery life to determine when to begin landing procedure
+  #Rotate in direction of movement
+  #Check proximity sensors to determine if clear to move in goal direction
+  #If clear: 
+    Move to april tag location (speed porpotional to distance from goal position)
+  #If obscured: 
+    Obstacle avoidance procedure
+    
+#Landing
+  #Check proximity sensors
+  #Check safe distance to ground robot
+  #Begin descent
+  #Confirm ground robot is stationary
+  #When within certain altitude, ramp down motors
+  #Shutoff motors
