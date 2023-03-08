@@ -1,25 +1,39 @@
-#Psuedocode for the drone
+## Psuedocode for the drone
 
-# Algorithm organization
-  #Finite state machine
-    # States: Start(), Tracking(), Avoid(), Land()
+
+## Algorithm organization
+  ## Finite state machine
+    # States: Start(), Tracking(), AprilTagNotDetected(), Land()
     
-  #Interrupt threads
+  ## Interrupt threads
+
+
+## Start
+  # Check battery life
+  # If battery life is low
+    # Cancel startup
+
+  # Confirm sensors operational
+  # Initialize sensors and camera
+  # Confirm motors are operational
+     
+  #Zero altitude sensor
   
-#Startup
-  #Confirm all sensors present/working
-  #Initialize sensors
-  #Initialize ground robot tracking camera
-  #Calibrate ground robot tracking camera? 
-     #(possible difficulties as no floor reference?)
-  #Check motors?
-     #(unsure if possible?)
-  #Zero height sensor
-  #Check proximity sensors
-  #OK to fly
+  #Check proximity sensors for nearby obstacles
+  # If there are nearby obstacles
+    # Shut down and end program
+  
   #Rise to predetermined altitude
   
-#Tracking
+  # Detect april tag
+  
+  # If April is detected
+    # Go to Tracking state
+  # Else
+    # Go to AprilTag not detected state
+    
+  
+## Tracking
   #Detect april tag
   #Ground robot tracking
   #Check battery life to determine when to begin landing procedure
@@ -30,10 +44,43 @@
   #If obscured: 
     Obstacle avoidance procedure
     
-#Landing
-  #Check proximity sensors
-  #Check safe distance to ground robot
-  #Begin descent
-  #Confirm ground robot is stationary
-  #When within certain altitude, ramp down motors
-  #Shutoff motors
+## AprilTagNotDetected
+  # For 20 seconds
+    # Hold position
+    # Search for AprilTag
+    
+    # If battery is low
+      # Go to landing state
+    # Else/If AprilTag is detected
+      # Go to Object Tracking State/Collision Avoidance State
+  # Go to landing state
+    
+      
+
+## Shutdown
+  // Checking for nearby obstacles probably isn't necessary since we just use a straight descent
+  # Check for nearby obstacles
+  # While there are nearby obstacles
+    # Move 90 degrees around the ground robot
+    # Check for nearby obstacles
+    # Break once one full revolution is complete
+    
+  # Check for safe distance to ground robot
+  # If drone is above ground robot
+    # Move X.Xm away from the ground robot
+  
+  # Enter descent loop
+    # Decrease altitude
+    
+    # Check for safe distance to ground robot
+    # If drone is above ground robot
+      # Move X.Xm away from the ground robot
+    
+    # Check altitude
+    # If below certain altitude
+      # Break
+       
+  # Ramp down motors
+  # Shut off motors
+  # Shut off sensors and other equipment
+  # Terminate Program
