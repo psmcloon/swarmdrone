@@ -1,0 +1,116 @@
+#Generalized Collision Avoidance Distance
+# import libraries
+import RPi.GPIO as GPIO
+import time
+import numpy as np
+# GPIO Modus (BOARD / BCM)
+GPIO.setmode(GPIO.BCM)
+
+
+#Tracking
+
+if GR distance not detected:
+    Transition to Apriltag Search;
+BatteryCheck
+if Batterylife<threshold:
+    Transition to Landing
+GRDist = GRDist;(#Horizontal for all values)
+GRVel = GRVel;
+GRAcc = GRAcc; #all GR values from AprilTag
+GRAngle = GRAngle;
+LOSAngle = LOSAngle;#Radian, angle between UAV and GR
+
+UAVAngle = UAVAngle; #UAV data from Flowdeck
+UAVVel = UAVVel;
+UAVAcc = UAVAcc;
+
+Vector = calculate;
+#pp-Pure Pursuit Guidance
+K = constant; #Varies, testing may be requried to find ideal constant
+axy = UAVVel*(GRVel*np.sin(GRAngle-LOSAngle)-UAVVel*np.sin(UAVAngle-LOSAngle)) - K*(UAVAngle-LOSAngle);#Feed acceleration directly to pixhawk
+Transition to CA
+
+
+
+#Collision Avoidance
+
+Collisionavoidancefrontcheck; #Front = distance(Front)
+if front not detected #front > threshold
+    move foward according to tracking vector  (axy)
+else if front detected:#Front < threshhold
+    Collisionavoidanceleftcheck; #left = distance(left)
+    Collisionavoidancerightcheck;#Right = distance(Right)
+    if left not detected:#Left > threshhold
+        while front detected
+            rotate left 1 degree;
+    else if right not detected:#Right > threshhold
+        while front detected;
+            rotate right 1 degree;
+    else
+    Collisionavoidancerearcheck;#Rear = distance(Rear)
+    if rear not detected: #Rear > threshhold
+        Collisionavoidanceleftcheck;#left = distance(left)
+        Collisionavoidancerightcheck;#Right = distance(Right)
+        while collision left or right detected:#left < threshhold or Right < threshhold
+            move backwards;
+            Collisionavoidanceleftcheck;#left = distance(left)
+            Collisionavoidancerightcheck;#Right = distance(Right)
+        if left not detected:#Left > threshhold
+            while front detected
+                rotate left 1 degree;
+        else if right not detected:#Right > threshhold
+            while front detected
+                rotate right 1 degree;
+    else
+    print(stuck);
+    transition to landing
+    #Consideration made for changing altitude, experimentation required
+
+while anythresholdcollision = true:#left < threshhold or Right < threshhold or Front < threshhold
+    collisionavoidancefrontcheck;#Front = distance(Front)
+    collisionavoidanceleftcheck;#left = distance(left)
+    collisionavoidancerightcheck;#Right = distance(Right)
+    move foward;   
+Transition to T
+
+#Landing:
+
+#Logarithmic method idea, velocity approachs zero as UAV approaches ground
+#Linear method also possible, constant velocity until certain distance from ground, then set to a lower velocity
+    
+#Linear 
+    collisionavoidancebottomcheck;#Bottom = distance(Bottom)
+    while bottom > 0.5 m
+        descend XXX m/s
+        collisionavoidancebottomcheck;#Bottom = distance(Bottom)
+    descend xxx m/s
+    
+    #Shutoff Procedure
+#-------------------------------------------------------------------------------------------------------------------------------
+def distance(GPIOpin):#Sort distance according to GPIOpin, labeled as FOWARD, LEFT, RIGHT, and REAR in pseudocode 
+    GPIO_SIG = GPIOpin;
+    GPIO.setup(GPIO_SIG, GPIO.OUT)
+    GPIO.output(GPIO_SIG, 0)
+
+    time.sleep(0.000002)
+
+    #send trigger signal
+    GPIO.output(GPIO_SIG, 1)
+
+    time.sleep(0.000005)
+
+    GPIO.output(GPIO_SIG, 0)
+
+    GPIO.setup(GPIO_SIG, GPIO.IN)
+
+    while GPIO.input(GPIO_SIG) == 0:
+        starttime = time.time()
+
+    while GPIO.input(GPIO_SIG) == 1:
+        endtime = time.time()
+      
+    duration = endtime - starttime
+    # Distance is defined as time/2 (there and back) * speed of sound 34000 cm/s 
+    distance = (duration*34000)/2
+ 
+    return distance
