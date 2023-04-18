@@ -40,6 +40,7 @@ if __name__ == '__main__':
       try:
             distancenum = distance()
             print ("Measured distance = %.1f cm" % distancenum)
+            # time between measurements
             time.sleep(0.2)
  
           # When canceling with CTRL+C, resetting
