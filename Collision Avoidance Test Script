@@ -9,55 +9,56 @@ GPIO.setmode(GPIO.BCM)
 if __name__ == '__main__':
     try:
         while True:
-            droneLength = 26;
+            droneLength = 26
             F = #Pin front, left, right, back
             L = #Pin
             R = #Pin
             B = #Pin
-            front = distance(F);
+            front = distance(F)
             if front >= droneLength: 
                 print ("move foward") 
             else if front < droneLength
-                left = distance(L);
-                right = distance(R);
-                rear = distance(B);
+                left = distance(L)
+                right = distance(R)
+                rear = distance(B)
                 if left >= droneLength:
-                    while front >= dronelength
-                        print("rotate left 1 degree");
-                        front = distance(F);
+                    while front >= dronelength:
+                        print("rotate left 1 degree")
+                        front = distance(F)
                 else if right >= droneLength:
-                    while front detected;
-                        Print("rotate right 1 degree");
+                    while front >= droneLength:
+                        Print("rotate right 1 degree")
+                        front = distance(F)
                 else if rear >= dronelength:
-                    rear = distance(B);
+                    rear = distance(B)
                     if rear >= droneLength: 
                         left = distance(L)
                         right = distance(R)
                         while left < droneLength or right < droneLength:
-                            print("move backwards");
+                            print("move backwards")
                             left = distance(L)
                             right = distance(R)
                     if left > droneLength:
-                        front = distance(F);
+                        front = distance(F)
                         while front < droneLength:
-                            print("rotate left 1 degree");
-                            front = distance(F);
-                    else if right > droneLength :#Right > threshhold
-                        while front < droneLength;
-                            print("rotate right 1 degree");
+                            print("rotate left 1 degree")
+                            front = distance(F)
+                    else if right > droneLength :
+                        while front < droneLength:
+                            print("rotate right 1 degree")
                 else
-                print("stuck");
+                print("stuck")
                 #Consideration made for changing altitude, experimentation required
 
                 while left < dronelength or right < droneLength or front < droneLength:
-                    front = distance(F);
-                    left = distance(L);
-                    Right = distance(R);
+                    front = distance(F)
+                    left = distance(L)
+                    Right = distance(R)
                     print("move foward)"  
  
     except KeyboardInterrupt:
-        print("Measurement stopped by user");
-        GPIO.cleanup();
+        print("Measurement stopped by user")
+        GPIO.cleanup()
                           
                           
 def distance(GPIOpin):#Sort distance according to GPIOpin, labeled as FOWARD, LEFT, RIGHT, and REAR in pseudocode 
