@@ -56,7 +56,8 @@ if __name__ == '__main__':
                     print("move foward)"  
  
     except KeyboardInterrupt:
-        print("Measurement stopped by user")
+        print("Measurement stopped by user");
+        GPIO.cleanup();
                           
                           
 def distance(GPIOpin):#Sort distance according to GPIOpin, labeled as FOWARD, LEFT, RIGHT, and REAR in pseudocode 
