@@ -1,0 +1,88 @@
+#Generalized Collision Avoidance Distance
+# import libraries
+import RPi.GPIO as GPIO
+import time
+import numpy as np
+# GPIO Modus (BOARD / BCM)
+GPIO.setmode(GPIO.BCM)
+
+if __name__ == '__main__':
+    try:
+        while True:
+            droneLength = 26;
+            F = #Pin front, left, right, back
+            L = #Pin
+            R = #Pin
+            B = #Pin
+            front = distance(F);
+            if front >= droneLength: 
+                print ("move foward") 
+            else if front < droneLength
+                left = distance(L);
+                right = distance(R);
+                rear = distance(B);
+                if left >= droneLength:
+                    while front >= dronelength
+                        print("rotate left 1 degree");
+                        front = distance(F);
+                else if right >= droneLength:
+                    while front detected;
+                        Print("rotate right 1 degree");
+                else if rear >= dronelength:
+                    rear = distance(B);
+                    if rear >= droneLength: 
+                        left = distance(L)
+                        right = distance(R)
+                        while left < droneLength or right < droneLength:
+                            print("move backwards");
+                            left = distance(L)
+                            right = distance(R)
+                    if left > droneLength:
+                        front = distance(F);
+                        while front < droneLength:
+                            print("rotate left 1 degree");
+                            front = distance(F);
+                    else if right > droneLength :#Right > threshhold
+                        while front < droneLength;
+                            print("rotate right 1 degree");
+                else
+                print("stuck");
+                #Consideration made for changing altitude, experimentation required
+
+                while left < dronelength or right < droneLength or front < droneLength:
+                    front = distance(F);
+                    left = distance(L);
+                    Right = distance(R);
+                    print("move foward)"  
+ 
+    except KeyboardInterrupt:
+        print("Measurement stopped by user")
+                          
+                          
+def distance(GPIOpin):#Sort distance according to GPIOpin, labeled as FOWARD, LEFT, RIGHT, and REAR in pseudocode 
+    GPIO_SIG = GPIOpin;
+    GPIO.setup(GPIO_SIG, GPIO.OUT)
+    GPIO.output(GPIO_SIG, 0)
+
+    time.sleep(0.000002)
+
+    #send trigger signal
+    GPIO.output(GPIO_SIG, 1)
+
+    time.sleep(0.000005)
+
+    GPIO.output(GPIO_SIG, 0)
+
+    GPIO.setup(GPIO_SIG, GPIO.IN)
+
+    while GPIO.input(GPIO_SIG) == 0:
+        starttime = time.time()
+
+    while GPIO.input(GPIO_SIG) == 1:
+        endtime = time.time()
+      
+    duration = endtime - starttime
+    # Distance is defined as time/2 (there and back) * speed of sound 34000 cm/s 
+    distance = (duration*34000)/2
+ 
+    return distance
