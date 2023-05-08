@@ -1,0 +1,28 @@
+import numpy as np
+#offset = 0
+if __name__ == '__main__':
+    try:
+        while True:
+            GR_Dist = np.sqrt(GR_x**2 + GR_y**2) #total distance to travel
+            GR_HDNG = GR_HDNG #Heading/azimuth angle, clockwise position
+            #global offset
+            Distance threshold = 0 + #offset #Distance threshold, possibly can be increased if drone is stuck
+            if GR distance not detected:
+                print("Transition to Apriltag Search")
+            #This current iteration does not account for the existence of the collision avoidance model.
+            GOAL_HDNG = GR_HDNG #Records current/desired heading angle relative to GR
+            #Goal is to set heading equal to zero - likely through some form of PID control
+            while GR_HDNG > 0: #Some consideration could be made for acceptable heading threshold
+                difference = GR_HDNG - 0
+                if np.sign(difference) > 0
+                    print("Rotate right");
+                else
+                    print("Rotate left");
+                    
+            while GR_Dist > threshold:
+                print("Move forward");
+            #if stuck:
+                #offset = offset + 0.1         
+ 
+    except KeyboardInterrupt:
+        print("Measurement stopped by user")
