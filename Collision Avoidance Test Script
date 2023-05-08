@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 while left < dronelength or right < droneLength or front < droneLength:
                     front = distance(F)
                     left = distance(L)
-                    Right = distance(R)
+                    right = distance(R)
                     print("move foward)"  
  
     except KeyboardInterrupt:
