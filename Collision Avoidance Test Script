@@ -6,7 +6,7 @@ import numpy as np
 # GPIO Modus (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
 
-if __name__ == '__main__':
+if __name__ == '__main__': # I think the big issue with this algorithm is that it assumes we want to move forwards, so the drone has to be oriented towards the direction we want to go when we enter the collision avoidance state. Is this intentional?
     try:
         while True:
             droneLength = 26
@@ -22,35 +22,35 @@ if __name__ == '__main__':
                 right = distance(R)
                 rear = distance(B)
                 if left >= droneLength:
-                    while front >= dronelength:
-                        print("rotate left 1 degree")
-                        front = distance(F)
+                    while front <= dronelength:
+                        print("rotate left 1 degree") # I think this doesn't work, you would want to rotate more, maybe 45 or 90 degrees. 
+                        front = distance(F) # why are we measuring front again? Won't it be measured when we loop the script?
                 else if right >= droneLength:
-                    while front >= droneLength:
+                    while front <= droneLength:
                         Print("rotate right 1 degree")
-                        front = distance(F)
+                        front = distance(F) # why are we measuring front again? Won't it be measured when we loop the script?
                 else if rear >= dronelength:
-                    rear = distance(B)
-                    if rear >= droneLength: 
-                        left = distance(L)
-                        right = distance(R)
-                        while left < droneLength or right < droneLength:
+                    rear = distance(B) # Why are we measuring rear right after using it in an if statement condition?
+                    if rear >= droneLength: # didn't we just check this?
+                        left = distance(L) # I think this whole block of code will execute quickly enough that we don't need to obtain the same distance measurement more than once. Taking measurements also uses up a lot of time.
+                        right = distance(R) # delete this
+                        while left < droneLength or right < droneLength: #this is dangerous because we are moving backwards without checking rear
                             print("move backwards")
-                            left = distance(L)
-                            right = distance(R)
-                    if left > droneLength:
-                        front = distance(F)
-                        while front < droneLength:
-                            print("rotate left 1 degree")
+                            left = distance(L) # delete this
+                            right = distance(R) # delete this
+                        if left > droneLength:
                             front = distance(F)
-                    else if right > droneLength :
-                        while front < droneLength:
-                            print("rotate right 1 degree")
+                            while front < droneLength:
+                                print("rotate left 1 degree")
+                                front = distance(F)
+                        else if right > droneLength :
+                            while front < droneLength:
+                                print("rotate right 1 degree")
                 else
-                print("stuck")
+                    print("stuck")
                 #Consideration made for changing altitude, experimentation required
 
-                while left < dronelength or right < droneLength or front < droneLength:
+                while left < dronelength or right < droneLength or front < droneLength: # why would we move forward if front < droneLength? I think lines 53-57 maybe can be deleted because it will just move forward during the next iteration
                     front = distance(F)
                     left = distance(L)
                     right = distance(R)
