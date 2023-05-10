@@ -30,27 +30,25 @@ if __name__ == '__main__': # I think the big issue with this algorithm is that i
                         Print("rotate right 1 degree")
                         front = distance(F) # why are we measuring front again? Won't it be measured when we loop the script?
                 else if rear >= dronelength:
-                    rear = distance(B) # Why are we measuring rear right after using it in an if statement condition?
-                    if rear >= droneLength: # didn't we just check this?
-                        left = distance(L) # I think this whole block of code will execute quickly enough that we don't need to obtain the same distance measurement more than once. Taking measurements also uses up a lot of time.
+                    left = distance(L) # I think this whole block of code will execute quickly enough that we don't need to obtain the same distance measurement more than once. Taking measurements also uses up a lot of time.
+                    right = distance(R) # delete this
+                    while left < droneLength or right < droneLength: #this is dangerous because we are moving backwards without checking rear
+                        print("move backwards")
+                        left = distance(L) # delete this
                         right = distance(R) # delete this
-                        while left < droneLength or right < droneLength: #this is dangerous because we are moving backwards without checking rear
-                            print("move backwards")
-                            left = distance(L) # delete this
-                            right = distance(R) # delete this
-                        if left > droneLength:
+                    if left > droneLength:
+                        front = distance(F)
+                        while front < droneLength:
+                            print("rotate left 1 degree")
                             front = distance(F)
-                            while front < droneLength:
-                                print("rotate left 1 degree")
-                                front = distance(F)
-                        else if right > droneLength :
-                            while front < droneLength:
-                                print("rotate right 1 degree")
+                    else if right > droneLength :
+                        while front < droneLength:
+                            print("rotate right 1 degree")
                 else
                     print("stuck")
                 #Consideration made for changing altitude, experimentation required
 
-                while left < dronelength or right < droneLength or front < droneLength: # why would we move forward if front < droneLength? I think lines 53-57 maybe can be deleted because it will just move forward during the next iteration
+                while left < dronelength or right < droneLength and front > droneLength: # why would we move forward if front < droneLength? I think lines 53-57 maybe can be deleted because it will just move forward during the next iteration
                     front = distance(F)
                     left = distance(L)
                     right = distance(R)
