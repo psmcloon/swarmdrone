@@ -10,7 +10,7 @@ if __name__ == '__main__':
     try:
         while True:
             droneLength = 26
-            F = 17 #Pin front, left, right, back
+            F = 17 #Pin 
             L = 26 #Pin
             R = 6 #Pin
             B = 16 #Pin
