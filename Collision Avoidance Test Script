@@ -23,19 +23,19 @@ if __name__ == '__main__': # I think the big issue with this algorithm is that i
                 rear = distance(B)
                 if left >= droneLength:
                     while front <= dronelength:
-                        print("rotate left 1 degree") # I think this doesn't work, you would want to rotate more, maybe 45 or 90 degrees. 
-                        front = distance(F) # why are we measuring front again? Won't it be measured when we loop the script?
+                        print("rotate left 1 degree") # Will rotate continuously until obstacle is no longer detected in path
+                        front = distance(F) # Update while loop condition
                 else if right >= droneLength:
                     while front <= droneLength:
                         Print("rotate right 1 degree")
-                        front = distance(F) # why are we measuring front again? Won't it be measured when we loop the script?
+                        front = distance(F) 
                 else if rear >= dronelength:
                     left = distance(L) # I think this whole block of code will execute quickly enough that we don't need to obtain the same distance measurement more than once. Taking measurements also uses up a lot of time.
                     right = distance(R) # delete this
                     while (left < droneLength and rear >= dronelength) or (right < droneLength and rear >= dronelength): # monitoring sides and rear while reversing
                         print("move backwards")
-                        left = distance(L) # delete this
-                        right = distance(R) # delete this
+                        left = distance(L) 
+                        right = distance(R) 
                     if left > droneLength:
                         front = distance(F)
                         while front < droneLength:
@@ -48,11 +48,11 @@ if __name__ == '__main__': # I think the big issue with this algorithm is that i
                     print("stuck")
                 #Consideration made for changing altitude, experimentation required
 
-                while (left < dronelength or right < droneLength) and front > droneLength: # why would we move forward if front < droneLength? I think lines 53-57 maybe can be deleted because it will just move forward during the next iteration
-                    front = distance(F)
-                    left = distance(L)
-                    right = distance(R)
-                    print("move foward)"  
+                while (left < dronelength or right < droneLength) and front > droneLength: # Move forward to clear obstacle
+                    front = distance(F) # Used to detect if there are additional obstacles in front
+                    left = distance(L) # motitor current obstacle
+                    right = distance(R) # motitor current obstacle
+                    print("move foward")  
  
     except KeyboardInterrupt:
         print("Measurement stopped by user")
