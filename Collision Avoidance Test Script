@@ -15,7 +15,7 @@ if __name__ == '__main__':
             R = 6 #Pin
             B = 16 #Pin
             front = distance(F)
-            if front >= droneLength: 
+            if front >= droneLength: #will not be necessary in integration, as well as first if statement
                 print ("move foward") 
             else if front < droneLength
                 left = distance(L)
