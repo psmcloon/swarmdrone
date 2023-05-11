@@ -39,7 +39,19 @@ if __name__ == '__main__':
                     
             while GR_Dist > threshold: #Does not account for existence of collision avoidance script yet. Should transition to collision avoidance if an object is detected
                 print("Move forward") #may want to set up a waypoint system, i.e saving the dist only at certain points rather than constantly. 
-                GR_Dist = GR_Dist
+                
+                pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation #Note: write as a function instead
+                roll = np.arcsin(pose_r[2,1]/np.cos(pitch)) # roll depedent on tag orientation
+                yaw = np.arcsin(pose_r[1,0]/np.cos(pitch))
+                arr1 = np.array(pose_r)
+                cpose_r = np.linalg.inv(arr1)
+                cpose_t = np.array(-1*pose_t)
+                tframepose_t = np.matmul(cpose_r, cpose_t)
+                cframepose_t = -tframepose_t # Transfer origin back to drone
+                yawarray = np.array([[np.cos(yaw), -np.sin(yaw), 0], [np.sin(yaw), np.cos(yaw), 0], [0, 0, 1]]) # define rotation matrix
+                position = np.matmul(np.linalg.inv(yawarray), cframepose_t)
+                
+                GR_Dist = np.sqrt(position[0]**2 + position[1]**2)
                 #if stuck: 
                     #offset = offset + 0.1    
                  #if GR_Dist <= threshold:
