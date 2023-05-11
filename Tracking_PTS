@@ -22,10 +22,9 @@ if __name__ == '__main__':
 
             #global offset
             Distance threshold = 0 + #offset #Distance threshold, possibly can be increased if drone is stuck
-            if GR distance not detected:
+            if position[2] == 0:
                 print("Transition to Apriltag Search")
             #This current iteration does not account for the existence of the collision avoidance model.
-            GOAL_HDNG = GR_HDNG #Records current/desired heading angle relative to GR
             #Goal is to set heading equal to zero - likely through some form of PID control
             while GR_HDNG > 0: #Some consideration could be made for acceptable heading threshold/pid control
                 difference = GR_HDNG - 0
@@ -33,7 +32,7 @@ if __name__ == '__main__':
                     print("Rotate right")
                 else
                     print("Rotate left")
-                GR_HDNG = GR_HDNG
+                GR_HDNG = -yaw #Need to update this part
                     
             while GR_Dist > threshold: #Does not account for existence of collision avoidance script yet. Should transition to collision avoidance if an object is detected
                 print("Move forward"); #may want to set up a waypoint system, i.e saving the dist only at certain points rather than constantly. 
