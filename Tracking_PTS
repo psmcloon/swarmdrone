@@ -3,8 +3,8 @@ import numpy as np
 if __name__ == '__main__':
     try:
         while True:
-            GR_Dist = np.sqrt(GR_x**2 + GR_y**2) #total distance to travel
-            GR_HDNG = GR_HDNG #Heading/azimuth angle, clockwise position
+            GR_Dist = np.sqrt(GR_x**2 + GR_y**2) #total distance to travel, pitch and roll corrected
+            GR_HDNG = GR_HDNG #Heading/azimuth angle, clockwise position #also pitch and roll corrected
             #global offset
             Distance threshold = 0 + #offset #Distance threshold, possibly can be increased if drone is stuck
             if GR distance not detected:
