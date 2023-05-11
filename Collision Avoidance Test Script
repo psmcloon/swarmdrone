@@ -9,7 +9,7 @@ GPIO.setmode(GPIO.BCM)
 if __name__ == '__main__':
     try:
         while True:
-            droneLength = 26
+            droneLength = 0.26 #meters
             F = 17 #Pin 
             L = 26 #Pin
             R = 6 #Pin
