@@ -83,6 +83,6 @@ def distance(GPIOpin):#Sort distance according to GPIOpin, labeled as FOWARD, LE
       
     duration = endtime - starttime
     # Distance is defined as time/2 (there and back) * speed of sound 34000 cm/s 
-    distance = (duration*34000)/2
+    distance = (duration*34000)/2/100 #return in meters
  
     return distance
