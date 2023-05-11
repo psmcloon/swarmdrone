@@ -32,7 +32,7 @@ if __name__ == '__main__': # I think the big issue with this algorithm is that i
                 else if rear >= dronelength:
                     left = distance(L) # I think this whole block of code will execute quickly enough that we don't need to obtain the same distance measurement more than once. Taking measurements also uses up a lot of time.
                     right = distance(R) # delete this
-                    while left < droneLength or right < droneLength: #this is dangerous because we are moving backwards without checking rear
+                    while (left < droneLength and rear >= dronelength) or (right < droneLength and rear >= dronelength): # monitoring sides and rear while reversing
                         print("move backwards")
                         left = distance(L) # delete this
                         right = distance(R) # delete this
