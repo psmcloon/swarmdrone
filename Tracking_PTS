@@ -5,7 +5,7 @@ if __name__ == '__main__':
         while True:
             # Add lines here to pull rotation matrix as pose_r and translation matrix as pose_t
             
-            pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation
+            pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation #Note: write as a function instead
             roll = np.arcsin(pose_r[2,1]/np.cos(pitch)) # roll depedent on tag orientation
             yaw = np.arcsin(pose_r[1,0]/np.cos(pitch))
             arr1 = np.array(pose_r)
