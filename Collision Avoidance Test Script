@@ -48,7 +48,7 @@ if __name__ == '__main__': # I think the big issue with this algorithm is that i
                     print("stuck")
                 #Consideration made for changing altitude, experimentation required
 
-                while left < dronelength or right < droneLength and front > droneLength: # why would we move forward if front < droneLength? I think lines 53-57 maybe can be deleted because it will just move forward during the next iteration
+                while (left < dronelength or right < droneLength) and front > droneLength: # why would we move forward if front < droneLength? I think lines 53-57 maybe can be deleted because it will just move forward during the next iteration
                     front = distance(F)
                     left = distance(L)
                     right = distance(R)
