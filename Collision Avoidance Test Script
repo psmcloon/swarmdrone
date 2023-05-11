@@ -6,14 +6,14 @@ import numpy as np
 # GPIO Modus (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
 
-if __name__ == '__main__': # I think the big issue with this algorithm is that it assumes we want to move forwards, so the drone has to be oriented towards the direction we want to go when we enter the collision avoidance state. Is this intentional?
+if __name__ == '__main__':
     try:
         while True:
             droneLength = 26
-            F = #Pin front, left, right, back
-            L = #Pin
-            R = #Pin
-            B = #Pin
+            F = 17 #Pin front, left, right, back
+            L = 26 #Pin
+            R = 6 #Pin
+            B = 16 #Pin
             front = distance(F)
             if front >= droneLength: 
                 print ("move foward") 
@@ -30,8 +30,8 @@ if __name__ == '__main__': # I think the big issue with this algorithm is that i
                         Print("rotate right 1 degree")
                         front = distance(F) 
                 else if rear >= dronelength:
-                    left = distance(L) # I think this whole block of code will execute quickly enough that we don't need to obtain the same distance measurement more than once. Taking measurements also uses up a lot of time.
-                    right = distance(R) # delete this
+                    left = distance(L)
+                    right = distance(R)
                     while (left < droneLength and rear >= dronelength) or (right < droneLength and rear >= dronelength): # monitoring sides and rear while reversing
                         print("move backwards")
                         left = distance(L) 
