@@ -18,6 +18,7 @@ if __name__ == '__main__':
                     print("Rotate right")
                 else
                     print("Rotate left")
+                GR_HDNG = GR_HDNG
                     
             while GR_Dist > threshold: #Does not account for existence of collision avoidance script yet. Should transition to collision avoidance if an object is detected
                 print("Move forward"); #may want to set up a waypoint system, i.e saving the dist only at certain points rather than constantly. 
