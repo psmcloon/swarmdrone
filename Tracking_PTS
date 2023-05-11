@@ -39,8 +39,8 @@ if __name__ == '__main__':
                 print("Move forward"); #may want to set up a waypoint system, i.e saving the dist only at certain points rather than constantly. 
                 #if stuck: 
                     #offset = offset + 0.1    
-                 if GR_Dist <= threshold:
-                    offset = 0 #reset offset 
+                 #if GR_Dist <= threshold:
+                    #offset = 0 #reset offset 
  
     except KeyboardInterrupt:
         print("Measurement stopped by user")
