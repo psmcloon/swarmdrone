@@ -17,8 +17,11 @@ GPIO.setmode(GPIO.BCM)
 class drone(StateMachine):
 
     # sequence of events
+    track = State(initial=True)
+    avoid = State()
+    notdetected = State()
     
-    def tracking(self):
+    def on_enter_track(self):
         """
         TRACKING PLAN:
         rotate in direction of tag
@@ -30,6 +33,8 @@ class drone(StateMachine):
         
         try:
             while True:
+                NextState = "track" # do we need this?
+                
                 # Add lines here to pull rotation matrix as pose_r and translation matrix as pose_t
                 pose_r = [[ 0.95254334  0.21532604  0.21516476] [-0.2826669   0.88799531  0.36271718] [-0.11296285 -0.40632379  0.90671957]] # Dummy tag reading until Emily finishes her code
                 pose_t = [[-0.02595762] [-0.06662991] [-1.36749298]] # Dummy tag reading until Emily finishes her code
@@ -45,51 +50,54 @@ class drone(StateMachine):
                 yawarray = np.array([[np.cos(yaw), -np.sin(yaw), 0], [np.sin(yaw), np.cos(yaw), 0], [0, 0, 1]]) # define rotation matrix
                 position = np.matmul(np.linalg.inv(yawarray), cframepose_t)
 
-              # x coord: position[0], y coord: position[1], z coord: position[2], yaw: -yaw (check signs on yaw, might be wrong)
-              GR_Dist = np.sqrt(position[0]**2 + position[1]**2) #total distance to travel
-              GR_HDNG = -yaw #Heading/azimuth angle, clockwise position
+                # x coord: position[0], y coord: position[1], z coord: position[2], yaw: -yaw (check signs on yaw, might be wrong)
+                GR_Dist = np.sqrt(position[0]**2 + position[1]**2) #total distance to travel
+                GR_HDNG = -yaw #Heading/azimuth angle, clockwise position
 
-              #global offset
-              Distance threshold = 0 + #offset #Distance threshold, possibly can be increased if drone is stuck
-              if position[2] == 0:
-                print("Transition to Apriltag Search")
-              #This current iteration does not account for the existence of the collision avoidance model.
-              #Goal is to set heading equal to zero - likely through some form of PID control
-              while GR_HDNG > 0: #Some consideration could be made for acceptable heading threshold/pid control
-                  difference = GR_HDNG - 0
-                  if np.sign(difference) > 0
-                      print("Rotate right")
-                  else
-                      print("Rotate left")
-                  pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation #Note: write as a function instead
-                  roll = np.arcsin(pose_r[2,1]/np.cos(pitch)) # roll depedent on tag orientation
-                  yaw = np.arcsin(pose_r[1,0]/np.cos(pitch))
-                  GR_HDNG = -yaw #Need to update this part
+                #global offset
+                Distance threshold = 0 + #offset #Distance threshold, possibly can be increased if drone is stuck
+                if position[2] == 0:
+                    print("Transition to Apriltag Search")
+                    NextState = "notdetected"
+                #This current iteration does not account for the existence of the collision avoidance model.
+                #Goal is to set heading equal to zero - likely through some form of PID control
+                while GR_HDNG > 0: #Some consideration could be made for acceptable heading threshold/pid control
+                    difference = GR_HDNG - 0
+                    if np.sign(difference) > 0
+                        print("Rotate right")
+                    else
+                        print("Rotate left")
+                    pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation #Note: write as a function instead
+                    roll = np.arcsin(pose_r[2,1]/np.cos(pitch)) # roll depedent on tag orientation
+                    yaw = np.arcsin(pose_r[1,0]/np.cos(pitch))
+                    GR_HDNG = -yaw #Need to update this part
 
-              while GR_Dist > threshold: #Does not account for existence of collision avoidance script yet. Should transition to collision avoidance if an object is detected
-                  print("Move forward") #may want to set up a waypoint system, i.e saving the dist only at certain points rather than constantly. 
+                while GR_Dist > threshold: #Does not account for existence of collision avoidance script yet. Should transition to collision avoidance if an object is detected
+                    print("Move forward") #may want to set up a waypoint system, i.e saving the dist only at certain points rather than constantly. 
 
-                  pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation #Note: write as a function instead
-                  roll = np.arcsin(pose_r[2,1]/np.cos(pitch)) # roll depedent on tag orientation
-                  yaw = np.arcsin(pose_r[1,0]/np.cos(pitch))
-                  arr1 = np.array(pose_r)
-                  cpose_r = np.linalg.inv(arr1)
-                  cpose_t = np.array(-1*pose_t)
-                  tframepose_t = np.matmul(cpose_r, cpose_t)
-                  cframepose_t = -tframepose_t # Transfer origin back to drone
-                  yawarray = np.array([[np.cos(yaw), -np.sin(yaw), 0], [np.sin(yaw), np.cos(yaw), 0], [0, 0, 1]]) # define rotation matrix
-                  position = np.matmul(np.linalg.inv(yawarray), cframepose_t)
+                    pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation #Note: write as a function instead
+                    roll = np.arcsin(pose_r[2,1]/np.cos(pitch)) # roll depedent on tag orientation
+                    yaw = np.arcsin(pose_r[1,0]/np.cos(pitch))
+                    arr1 = np.array(pose_r)
+                    cpose_r = np.linalg.inv(arr1)
+                    cpose_t = np.array(-1*pose_t)
+                    tframepose_t = np.matmul(cpose_r, cpose_t)
+                    cframepose_t = -tframepose_t # Transfer origin back to drone
+                    yawarray = np.array([[np.cos(yaw), -np.sin(yaw), 0], [np.sin(yaw), np.cos(yaw), 0], [0, 0, 1]]) # define rotation matrix
+                    position = np.matmul(np.linalg.inv(yawarray), cframepose_t)
 
-                  GR_Dist = np.sqrt(position[0]**2 + position[1]**2)
-                  #if stuck: 
+                    GR_Dist = np.sqrt(position[0]**2 + position[1]**2)
+                    #if stuck: 
                       #offset = offset + 0.1    
-                   #if GR_Dist <= threshold:
-                      #offset = 0 #reset offset 
+                    #if GR_Dist <= threshold:
+                      #offset = 0 #reset offset
 
         except KeyboardInterrupt:
             print("Measurement stopped by user")
+            
+        return NextState
 
-    def collisionavoidance(self):
+    def on_enter_avoid(self):
         """
         COLLISION AVOIDANCE PLAN:
         determine which direction of movement is blocked
@@ -97,55 +105,58 @@ class drone(StateMachine):
         revert to tracking
         """
         try:
-        while True:
-            droneLength = 0.26 #meters
-            F = 17 #Pin 
-            L = 26 #Pin
-            R = 6 #Pin
-            B = 16 #Pin
-            front = distance(F)
-            if front >= droneLength: #will not be necessary in integration, as well as first if statement
-                print ("move foward") 
-            else if front < droneLength
-                left = distance(L)
-                right = distance(R)
-                rear = distance(B)
-                if left >= droneLength:
-                    while front <= dronelength:
-                        print("rotate left 1 degree") # Will rotate continuously until obstacle is no longer detected in path
-                        front = distance(F) # Update while loop condition
-                else if right >= droneLength:
-                    while front <= droneLength:
-                        Print("rotate right 1 degree")
-                        front = distance(F) 
-                else if rear >= dronelength:
+            while True:
+                droneLength = 0.26 #meters
+                F = 17 #Pin 
+                L = 26 #Pin
+                R = 6 #Pin
+                B = 16 #Pin
+                front = distance(F)
+                if front >= droneLength: #will not be necessary in integration, as well as first if statement
+                    print ("move foward") 
+                else if front < droneLength
                     left = distance(L)
                     right = distance(R)
-                    while (left < droneLength and rear >= dronelength) or (right < droneLength and rear >= dronelength): # monitoring sides and rear while reversing
-                        print("move backwards")
-                        left = distance(L) 
-                        right = distance(R) 
-                    if left > droneLength:
-                        front = distance(F)
-                        while front < droneLength:
-                            print("rotate left 1 degree")
+                    rear = distance(B)
+                    if left >= droneLength:
+                        while front <= dronelength:
+                            print("rotate left 1 degree") # Will rotate continuously until obstacle is no longer detected in path
+                            front = distance(F) # Update while loop condition
+                    else if right >= droneLength:
+                        while front <= droneLength:
+                            Print("rotate right 1 degree")
+                            front = distance(F) 
+                    else if rear >= dronelength:
+                        left = distance(L)
+                        right = distance(R)
+                        while (left < droneLength and rear >= dronelength) or (right < droneLength and rear >= dronelength): # monitoring sides and rear while reversing
+                            print("move backwards")
+                            left = distance(L) 
+                            right = distance(R) 
+                        if left > droneLength:
                             front = distance(F)
-                    else if right > droneLength :
-                        while front < droneLength:
-                            print("rotate right 1 degree")
-                else
-                    print("stuck")
-                #Consideration made for changing altitude, experimentation required
+                            while front < droneLength:
+                                print("rotate left 1 degree")
+                                front = distance(F)
+                        else if right > droneLength :
+                            while front < droneLength:
+                                print("rotate right 1 degree")
+                    else
+                        print("stuck")
+                    #Consideration made for changing altitude, experimentation required
 
-                while (left < dronelength or right < droneLength) and front > droneLength: # Move forward to clear obstacle
-                    front = distance(F) # Used to detect if there are additional obstacles in front
-                    left = distance(L) # motitor current obstacle
-                    right = distance(R) # motitor current obstacle
-                    print("move foward")  
-                #Print("Transition to tracking)
-        except KeyboardInterrupt:
-            print("Measurement stopped by user")
-            GPIO.cleanup()
+                    while (left < dronelength or right < droneLength) and front > droneLength: # Move forward to clear obstacle
+                        front = distance(F) # Used to detect if there are additional obstacles in front
+                        left = distance(L) # motitor current obstacle
+                        right = distance(R) # motitor current obstacle
+                        print("move foward")  
+                    #Print("Transition to tracking)
+            except KeyboardInterrupt:
+                print("Measurement stopped by user")
+                GPIO.cleanup()
+       
+        return NextState
+       
         def distance(GPIOpin):#Sort distance according to GPIOpin, labeled as FOWARD, LEFT, RIGHT, and REAR in pseudocode 
             GPIO_SIG = GPIOpin;
             GPIO.setup(GPIO_SIG, GPIO.OUT)
@@ -174,7 +185,7 @@ class drone(StateMachine):
 
             return distance
         
-    def tagnotdetected(self):
+    def on_enter_notdetected(self):
         """
         TAG NOT DETECTED PLAN:
         wait for 20 seconds, checking for tag once every second.
@@ -194,7 +205,16 @@ class drone(StateMachine):
 
 
             if position[2] == 0:
-                # transition to tracking state
-
-        print("Transition to landing state")
+                NextState = 'track'
+                return NextState
+        print('transition to landing state')
        
+demo = drone()
+demo.track()
+while True:
+    if NextState == "track"
+        demo.track()
+    else if NextState == "avoid"
+        demo.avoid()
+    else if NextState == "notdetected"
+        demo.notdetected()
