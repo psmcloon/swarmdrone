@@ -16,12 +16,17 @@ GPIO.setmode(GPIO.BCM)
 
 class drone(StateMachine):
 
-    # sequence of events
-    track = State(initial=True)
+    # states
+    track = State()
     avoid = State()
     notdetected = State()
     
-    def on_enter_track(self):
+    #sequences
+    runtrack = track.to.itself()
+    runavoid = avoid.to.itself()
+    runnotdetected = notdetected.to.itself()
+    
+    def on_enter_track(self): ## add check for collision
         """
         TRACKING PLAN:
         rotate in direction of tag
@@ -32,9 +37,7 @@ class drone(StateMachine):
         #offset = 0
         
         try:
-            while True:
-                NextState = "track" # do we need this?
-                
+            while True:                
                 # Add lines here to pull rotation matrix as pose_r and translation matrix as pose_t
                 pose_r = [[ 0.95254334  0.21532604  0.21516476] [-0.2826669   0.88799531  0.36271718] [-0.11296285 -0.40632379  0.90671957]] # Dummy tag reading until Emily finishes her code
                 pose_t = [[-0.02595762] [-0.06662991] [-1.36749298]] # Dummy tag reading until Emily finishes her code
@@ -154,7 +157,7 @@ class drone(StateMachine):
             except KeyboardInterrupt:
                 print("Measurement stopped by user")
                 GPIO.cleanup()
-       
+        NextState = "track"
         return NextState
        
         def distance(GPIOpin):#Sort distance according to GPIOpin, labeled as FOWARD, LEFT, RIGHT, and REAR in pseudocode 
@@ -213,8 +216,8 @@ demo = drone()
 demo.track()
 while True:
     if NextState == "track"
-        demo.track()
+        demo.runtrack()
     else if NextState == "avoid"
-        demo.avoid()
+        demo.runavoid()
     else if NextState == "notdetected"
-        demo.notdetected()
+        demo.runnotdetected()
