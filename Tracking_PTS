@@ -4,6 +4,8 @@ if __name__ == '__main__':
     try:
         while True:
             # Add lines here to pull rotation matrix as pose_r and translation matrix as pose_t
+            pose_r = [[ 0.95254334  0.21532604  0.21516476] [-0.2826669   0.88799531  0.36271718] [-0.11296285 -0.40632379  0.90671957]] # Dummy tag reading until Emily finishes her code
+            pose_t = [[-0.02595762] [-0.06662991] [-1.36749298]] # Dummy tag reading until Emily finishes her code
             
             pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation #Note: write as a function instead
             roll = np.arcsin(pose_r[2,1]/np.cos(pitch)) # roll depedent on tag orientation
