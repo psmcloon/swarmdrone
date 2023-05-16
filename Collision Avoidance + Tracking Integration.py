@@ -6,18 +6,16 @@ Michael Hu, Kohya Kato, Patrick McLoon, Finnley Meinig, Emily Nguyen
 """
 
 # import libraries
-from pymavlink import mavutil #do we need this?
 import time
 import RPi.GPIO as GPIO
 import numpy as np
-# GPIO Modus (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
     
 def track(): ## add check for collision
     """
     TRACKING PLAN:
     rotate in direction of tag
-    move to april tag location with a speed proportional to the distance to the goal
+    move to april tag location
     if obscured - go to collisionavoidance
     """
 
@@ -29,7 +27,7 @@ def track(): ## add check for collision
             pose_r = [[ 0.95254334  0.21532604  0.21516476] [-0.2826669   0.88799531  0.36271718] [-0.11296285 -0.40632379  0.90671957]] # Dummy tag reading until Emily finishes her code
             pose_t = [[-0.02595762] [-0.06662991] [-1.36749298]] # Dummy tag reading until Emily finishes her code
 
-            pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation #Note: write as a function instead
+            pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation
             roll = np.arcsin(pose_r[2,1]/np.cos(pitch)) # roll depedent on tag orientation
             yaw = np.arcsin(pose_r[1,0]/np.cos(pitch))
             arr1 = np.array(pose_r)
@@ -59,15 +57,16 @@ def track(): ## add check for collision
                     print("Rotate right")
                 else
                     print("Rotate left")
-                pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation #Note: write as a function instead
+                pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation
                 roll = np.arcsin(pose_r[2,1]/np.cos(pitch)) # roll depedent on tag orientation
                 yaw = np.arcsin(pose_r[1,0]/np.cos(pitch))
                 GR_HDNG = -yaw #Need to update this part
 
             while GR_Dist > threshold: #Does not account for existence of collision avoidance script yet. Should transition to collision avoidance if an object is detected
-                print("Move forward") #may want to set up a waypoint system, i.e saving the dist only at certain points rather than constantly. 
+                print("Move forward") #may want to set up a waypoint system, i.e saving the dist only at certain points rather than constantly.
+                # Add math to calculate movement speed or distance
 
-                pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation #Note: write as a function instead
+                pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation
                 roll = np.arcsin(pose_r[2,1]/np.cos(pitch)) # roll depedent on tag orientation
                 yaw = np.arcsin(pose_r[1,0]/np.cos(pitch))
                 arr1 = np.array(pose_r)
@@ -97,29 +96,24 @@ def avoid():
     revert to tracking
     """
 
-    def distance(GPIOpin):#Sort distance according to GPIOpin, labeled as FOWARD, LEFT, RIGHT, and REAR in pseudocode 
+    def distance(GPIOpin):
         GPIO_SIG = GPIOpin;
         GPIO.setup(GPIO_SIG, GPIO.OUT)
         GPIO.output(GPIO_SIG, 0)
 
         time.sleep(0.000002)
-
+        
         #send trigger signal
         GPIO.output(GPIO_SIG, 1)
-
         time.sleep(0.000005)
-
         GPIO.output(GPIO_SIG, 0)
-
         GPIO.setup(GPIO_SIG, GPIO.IN)
-
         while GPIO.input(GPIO_SIG) == 0:
             starttime = time.time()
-
         while GPIO.input(GPIO_SIG) == 1:
             endtime = time.time()
-
         duration = endtime - starttime
+        
         # Distance is defined as time/2 (there and back) * speed of sound 34000 cm/s 
         distance = (duration*34000)/2/100 #return in meters
 
@@ -198,12 +192,13 @@ def notdetected():
         # search for april tag
 
 
-        if position[2] == 0:
+        if position[2] != 0:
             NextState = 'track'
             return NextState
         
     print('transition to landing state')
        
+track()
 while True:
     if NextState == "track":
         track()
