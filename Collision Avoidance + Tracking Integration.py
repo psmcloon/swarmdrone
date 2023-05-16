@@ -10,7 +10,9 @@ import time
 import RPi.GPIO as GPIO
 import numpy as np
 GPIO.setmode(GPIO.BCM)
-    
+
+stuck = 0 #for use in collision avoidance and tracking
+
 def track(): ## add check for collision
     """
     TRACKING PLAN:
@@ -83,10 +85,11 @@ def track(): ## add check for collision
                 position = np.matmul(np.linalg.inv(yawarray), cframepose_t)
 
                 GR_Dist = np.sqrt(position[0]**2 + position[1]**2)
-                #if stuck: 
-                  #offset = offset + 0.1    
-                #if GR_Dist <= threshold:
-                  #offset = 0 #reset offset
+                if stuck == 1: 
+                  offset = offset + 0.1
+            stuck = 0
+            offset = 0
+
 
     except KeyboardInterrupt:
         print("Measurement stopped by user")
@@ -163,6 +166,7 @@ def avoid():
                         print("rotate right 1 degree")
             else:
                 print("stuck") #global variable stuck = 1
+                stuck = 1
             #Consideration made for changing altitude, experimentation required
 
             while (left < droneLength or right < droneLength) and front > droneLength: # Move forward to clear obstacle
