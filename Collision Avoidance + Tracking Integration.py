@@ -26,9 +26,9 @@ def track(): ## add check for collision
     try:
         while True:                
             # Add lines here to pull rotation matrix as pose_r and translation matrix as pose_t
-            pose_r = [[ 0.95254334  0.21532604  0.21516476] [-0.2826669   0.88799531  0.36271718] [-0.11296285 -0.40632379  0.90671957]] # Dummy tag reading until Emily finishes her code
-            pose_t = [[-0.02595762] [-0.06662991] [-1.36749298]] # Dummy tag reading until Emily finishes her code
-
+            pose_r = np.array([[0.9525433, 0.21532604, 0.21516476], [-0.2826669, 0.88799531, 0.36271718], [-0.11296285, -0.40632379, 0.90671957]]) # Dummy tag reading until Emily finishes her code
+            pose_t = np.array([-0.02595762, -0.06662991, -1.36749298]) # Dummy tag reading until Emily finishes her code
+            print(pose_r[0,0])
             pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation
             roll = np.arcsin(pose_r[2,1]/np.cos(pitch)) # roll depedent on tag orientation
             yaw = np.arcsin(pose_r[1,0]/np.cos(pitch))
@@ -47,7 +47,7 @@ def track(): ## add check for collision
             NextState = "track"
             
             #global offset
-            Distance threshold = 0 + #offset #Distance threshold, possibly can be increased if drone is stuck
+            threshold = 0 #offset #Distance threshold, possibly can be increased if drone is stuck
             if position[2] == 0:
                 print("Transition to Apriltag Search")
                 NextState = "notdetected"
@@ -55,9 +55,9 @@ def track(): ## add check for collision
             #Goal is to set heading equal to zero - likely through some form of PID control
             while GR_HDNG > 0: #Some consideration could be made for acceptable heading threshold/pid control
                 difference = GR_HDNG - 0
-                if np.sign(difference) > 0
+                if np.sign(difference) > 0:
                     print("Rotate right")
-                else
+                else:
                     print("Rotate left")
                 pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation
                 roll = np.arcsin(pose_r[2,1]/np.cos(pitch)) # roll depedent on tag orientation
