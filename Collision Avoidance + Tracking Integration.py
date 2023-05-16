@@ -107,6 +107,35 @@ class drone(StateMachine):
         move accordingly
         revert to tracking
         """
+        
+        def distance(GPIOpin):#Sort distance according to GPIOpin, labeled as FOWARD, LEFT, RIGHT, and REAR in pseudocode 
+            GPIO_SIG = GPIOpin;
+            GPIO.setup(GPIO_SIG, GPIO.OUT)
+            GPIO.output(GPIO_SIG, 0)
+
+            time.sleep(0.000002)
+
+            #send trigger signal
+            GPIO.output(GPIO_SIG, 1)
+
+            time.sleep(0.000005)
+
+            GPIO.output(GPIO_SIG, 0)
+
+            GPIO.setup(GPIO_SIG, GPIO.IN)
+
+            while GPIO.input(GPIO_SIG) == 0:
+                starttime = time.time()
+
+            while GPIO.input(GPIO_SIG) == 1:
+                endtime = time.time()
+
+            duration = endtime - starttime
+            # Distance is defined as time/2 (there and back) * speed of sound 34000 cm/s 
+            distance = (duration*34000)/2/100 #return in meters
+
+            return distance
+        
         try:
             while True:
                 droneLength = 0.26 #meters
@@ -154,39 +183,11 @@ class drone(StateMachine):
                         right = distance(R) # motitor current obstacle
                         print("move foward")  
                     #Print("Transition to tracking)
-            except KeyboardInterrupt:
-                print("Measurement stopped by user")
-                GPIO.cleanup()
-        NextState = "track"
+        except KeyboardInterrupt:
+            print("Measurement stopped by user")
+            GPIO.cleanup()
+            NextState = "track"
         return NextState
-       
-        def distance(GPIOpin):#Sort distance according to GPIOpin, labeled as FOWARD, LEFT, RIGHT, and REAR in pseudocode 
-            GPIO_SIG = GPIOpin;
-            GPIO.setup(GPIO_SIG, GPIO.OUT)
-            GPIO.output(GPIO_SIG, 0)
-
-            time.sleep(0.000002)
-
-            #send trigger signal
-            GPIO.output(GPIO_SIG, 1)
-
-            time.sleep(0.000005)
-
-            GPIO.output(GPIO_SIG, 0)
-
-            GPIO.setup(GPIO_SIG, GPIO.IN)
-
-            while GPIO.input(GPIO_SIG) == 0:
-                starttime = time.time()
-
-            while GPIO.input(GPIO_SIG) == 1:
-                endtime = time.time()
-
-            duration = endtime - starttime
-            # Distance is defined as time/2 (there and back) * speed of sound 34000 cm/s 
-            distance = (duration*34000)/2/100 #return in meters
-
-            return distance
         
     def on_enter_notdetected(self):
         """
