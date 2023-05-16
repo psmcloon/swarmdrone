@@ -49,7 +49,7 @@ def track(): ## add check for collision
             if position[2] == 0:
                 print("Transition to Apriltag Search")
                 NextState = "notdetected"
-            #This current iteration does not account for the existence of the collision avoidance model.
+           
             #Goal is to set heading equal to zero - likely through some form of PID control
             while GR_HDNG > 0: #Some consideration could be made for acceptable heading threshold/pid control
                 difference = GR_HDNG - 0
@@ -62,8 +62,13 @@ def track(): ## add check for collision
                 yaw = np.arcsin(pose_r[1,0]/np.cos(pitch))
                 GR_HDNG = -yaw #Need to update this part
 
-            while GR_Dist > threshold: #Does not account for existence of collision avoidance script yet. Should transition to collision avoidance if an object is detected
-                print("Move forward") #may want to set up a waypoint system, i.e saving the dist only at certain points rather than constantly.
+            while GR_Dist > threshold: 
+                front = distance(F)
+                if front > threshold:
+                    print("Move forward") #may want to set up a waypoint system, i.e saving the dist only at certain points rather than constantly.
+                else:
+                    print("Transition to collision avvoidance")
+                    NextState = "avoid"
                 # Add math to calculate movement speed or distance
 
                 pitch = np.arcsin(-pose_r[2,0]) # pitch dependent on tag orientation
@@ -127,45 +132,45 @@ def avoid():
             R = 6 #Pin
             B = 16 #Pin
             front = distance(F)
-            if front >= droneLength: #will not be necessary in integration, as well as first if statement
-                print ("move foward") 
-            elif front < droneLength:
+            #if front >= droneLength: #will not be necessary in integration, as well as first if statement
+            #    print ("move foward") 
+            #elif front < droneLength:
+            left = distance(L)
+            right = distance(R)
+            rear = distance(B)
+            if left >= droneLength:
+                while front <= droneLength:
+                    print("rotate left 1 degree") # Will rotate continuously until obstacle is no longer detected in path
+                    front = distance(F) # Update while loop condition
+            elif right >= droneLength:
+                while front <= droneLength:
+                    Print("rotate right 1 degree")
+                    front = distance(F) 
+            elif rear >= dronelength:
                 left = distance(L)
                 right = distance(R)
-                rear = distance(B)
-                if left >= droneLength:
-                    while front <= droneLength:
-                        print("rotate left 1 degree") # Will rotate continuously until obstacle is no longer detected in path
-                        front = distance(F) # Update while loop condition
-                elif right >= droneLength:
-                    while front <= droneLength:
-                        Print("rotate right 1 degree")
-                        front = distance(F) 
-                elif rear >= dronelength:
-                    left = distance(L)
-                    right = distance(R)
-                    while (left < droneLength and rear >= dronelength) or (right < droneLength and rear >= dronelength): # monitoring sides and rear while reversing
-                        print("move backwards")
-                        left = distance(L) 
-                        right = distance(R) 
-                    if left > droneLength:
+                while (left < droneLength and rear >= dronelength) or (right < droneLength and rear >= dronelength): # monitoring sides and rear while reversing
+                    print("move backwards")
+                    left = distance(L) 
+                    right = distance(R) 
+                if left > droneLength:
+                    front = distance(F)
+                    while front < droneLength:
+                        print("rotate left 1 degree")
                         front = distance(F)
-                        while front < droneLength:
-                            print("rotate left 1 degree")
-                            front = distance(F)
-                    elif right > droneLength :
-                        while front < droneLength:
-                            print("rotate right 1 degree")
-                else:
-                    print("stuck")
-                #Consideration made for changing altitude, experimentation required
+                elif right > droneLength :
+                    while front < droneLength:
+                        print("rotate right 1 degree")
+            else:
+                print("stuck") #global variable stuck = 1
+            #Consideration made for changing altitude, experimentation required
 
-                while (left < droneLength or right < droneLength) and front > droneLength: # Move forward to clear obstacle
-                    front = distance(F) # Used to detect if there are additional obstacles in front
-                    left = distance(L) # motitor current obstacle
-                    right = distance(R) # motitor current obstacle
-                    print("move foward")  
-                #Print("Transition to tracking)
+            while (left < droneLength or right < droneLength) and front > droneLength: # Move forward to clear obstacle
+                front = distance(F) # Used to detect if there are additional obstacles in front
+                left = distance(L) # motitor current obstacle
+                right = distance(R) # motitor current obstacle
+                print("move foward")  
+            #Print("Transition to tracking)
     except KeyboardInterrupt:
         print("Measurement stopped by user")
         GPIO.cleanup()
