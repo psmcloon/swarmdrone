@@ -127,58 +127,64 @@ def avoid():
 
         return distance
 
-    try:
-        while True:
-            droneLength = 0.26 #meters
-            F = 17 #Pin 
-            L = 26 #Pin
-            R = 6 #Pin
-            B = 16 #Pin
-            front = distance(F)
-            #if front >= droneLength: #will not be necessary in integration, as well as first if statement
-            #    print ("move foward") 
-            #elif front < droneLength:
+    droneLength = 0.26 #meters
+    F = 17 #Pin 
+    L = 26 #Pin
+    R = 6 #Pin
+    B = 16 #Pin
+    sleepdur = 0.05
+    while True:
+        try:
+            front = distance(F) 
             left = distance(L)
             right = distance(R)
             rear = distance(B)
             if left >= droneLength:
                 while front <= droneLength:
+                    time.sleep(sleepdur)
                     print("rotate left 1 degree") # Will rotate continuously until obstacle is no longer detected in path
                     front = distance(F) # Update while loop condition
             elif right >= droneLength:
                 while front <= droneLength:
-                    Print("rotate right 1 degree")
+                    time.sleep(sleepdur)
+                    print("rotate right 1 degree")
                     front = distance(F) 
-            elif rear >= dronelength:
+            elif rear >= droneLength:
                 left = distance(L)
                 right = distance(R)
-                while (left < droneLength and rear >= dronelength) or (right < droneLength and rear >= dronelength): # monitoring sides and rear while reversing
+                while left < droneLength and rear >= droneLength and right < droneLength: # monitoring sides and rear while reversing
+                    time.sleep(sleepdur)                
                     print("move backwards")
                     left = distance(L) 
                     right = distance(R) 
+                    rear = distance(B)
                 if left > droneLength:
-                    front = distance(F)
                     while front < droneLength:
+                        time.sleep(sleepdur)
                         print("rotate left 1 degree")
                         front = distance(F)
-                elif right > droneLength :
+                elif right > droneLength:
                     while front < droneLength:
+                        time.sleep(sleepdur)
                         print("rotate right 1 degree")
+                        front = distance(F)
             else:
-                print("stuck") #global variable stuck = 1
-                stuck = 1
+                print("stuck, transition to landing")
+                break
             #Consideration made for changing altitude, experimentation required
 
             while (left < droneLength or right < droneLength) and front > droneLength: # Move forward to clear obstacle
+                time.sleep(sleepdur)            
                 front = distance(F) # Used to detect if there are additional obstacles in front
-                left = distance(L) # motitor current obstacle
-                right = distance(R) # motitor current obstacle
-                print("move foward")  
-            #Print("Transition to tracking)
-    except KeyboardInterrupt:
-        print("Measurement stopped by user")
-        GPIO.cleanup()
-
+                left = distance(L) # monitor current obstacle
+                right = distance(R) # monitor current obstacle
+                print("move foward") 
+            print("Transition to tracking")   
+        except KeyboardInterrupt:
+            print("Measurement stopped by user")
+            GPIO.cleanup()
+            break
+        
     NextState = "track"
     return NextState
 
