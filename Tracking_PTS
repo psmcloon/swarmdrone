@@ -22,15 +22,15 @@ if __name__ == '__main__':
             GR_Dist = np.sqrt(position[0]**2 + position[1]**2) #total distance to travel
             GR_HDNG = -yaw #Heading/azimuth angle, clockwise position
 
-            #global offset
-            Distance threshold = 0 + #offset #Distance threshold, possibly can be increased if drone is stuck
+            #global offset offset may not required if stuck just transitions to landing
+            Distance threshold = 0 + #offset #Distance threshold, possibly can be increased if drone is stuck, remove offset
             if position[2] == 0:
                 print("Transition to Apriltag Search")
             #This current iteration does not account for the existence of the collision avoidance model.
             #Goal is to set heading equal to zero - likely through some form of PID control
             while GR_HDNG > 0: #Some consideration could be made for acceptable heading threshold/pid control
                 difference = GR_HDNG - 0
-                if np.sign(difference) > 0
+                if np.sign(difference) > 0:
                     print("Rotate right")
                 else
                     print("Rotate left")
