@@ -45,6 +45,6 @@ def listener():
 
 	rospy.spin()
 
-0if __name__ == '__main__':
+if __name__ == '__main__':
 	listener()
 
