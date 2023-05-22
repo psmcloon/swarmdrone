@@ -191,7 +191,7 @@ def avoid():
     right = distance(R) # monitor current obstacle
     print("move foward") 
     print("Transition to tracking")   
-  GPIO.cleanup()
+ # GPIO.cleanup()
   NextState = "track"
   return NextState
 
@@ -223,6 +223,7 @@ def notdetected():
     
 def callback(data):
   global NextState
+
     
   GR_Dist, GR_HDNG, position = getpose(data)
 
@@ -244,3 +245,4 @@ def listener():
     
 if __name__ == '__main__':
 	listener()
+	GPIO.cleanup()
