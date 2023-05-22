@@ -2,7 +2,7 @@
 
 import rospy
 from apriltag_ros.msg import AprilTagDetectionArray
-from scipy.spatial.transform import Rotation as R
+from scipy.spatial.transform import Rotation as Rot
 import numpy as np
 import RPi.GPIO as GPIO
 import time
@@ -14,14 +14,14 @@ GPIO.setmode(GPIO.BCM)
 #global offset offset may not required if stuck just transitions to landing
 distthresh = 0.1 #+ offset #Distance threshold, possibly can be increased if drone is stuck, remove offset
 hdngthresh = 0.1
-NextState = "track"
-droneLength = 0.26 #meters
+droneLength = 0.1 #meters
 F = 17 #Pin 
 L = 26 #Pin
 R = 6 #Pin
 B = 16 #Pin
 sleepdur = 0.05
 notdetect = 0
+NextState = "track"
 
 def getpose(data):
 	translation = [[]]
@@ -44,7 +44,7 @@ def getpose(data):
 
 		quatermatrix = [quater_rotx, quater_roty, quater_rotz, quater_rotw]
 
-		rotation = R.from_quat(quatermatrix)
+		rotation = Rot.from_quat(quatermatrix)
 		rotation = rotation.as_matrix()
 
 		translation = [posx, posy, posz]
@@ -139,7 +139,7 @@ def track(GR_Dist, GR_HDNG, position):
   return NextState
 
 
-def avoid()
+def avoid():
   """
   COLLISION AVOIDANCE PLAN:
   determine which direction of movement is blocked
@@ -191,8 +191,6 @@ def avoid()
     right = distance(R) # monitor current obstacle
     print("move foward") 
     print("Transition to tracking")   
-  except KeyboardInterrupt:
-    print("Measurement stopped by user")
   GPIO.cleanup()
   NextState = "track"
   return NextState
@@ -206,7 +204,7 @@ def notdetected():
   If tag is not detected for 20 seconds, transition to landing state.
   """
 
-  if notdetect < 40
+  if notdetect < 40:
     notdetect = notdetect + 1
     time.sleep(0.5)
 
@@ -224,8 +222,8 @@ def notdetected():
     print('transition to landing state')
     
 def callback(data):
-  if NextState = "notdetected":
-    position[2] = 0
+  global NextState
+  global position
     
   GR_Dist, GR_HDNG, position = getpose(data)
 
