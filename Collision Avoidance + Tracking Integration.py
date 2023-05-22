@@ -114,9 +114,11 @@ def track(GR_Dist, GR_HDNG, position):
   if position[2] == 0:
     print("Transition to Apriltag Search")
     NextState = "notdetected"
+    return NextState
   elif distance(F) <= 0.75*droneLength
     print("Transition to Collision Avoidance")
     NextState = "avoid"
+    return NextState
      
   #This current iteration does not account for the existence of the collision avoidance model.
   #Goal is to set heading equal to zero - likely through some form of PID control
@@ -210,7 +212,7 @@ def notdetected():
     print('hold position')
 
     # search for april tag
-
+    
 
     if position[2] != 0:
       NextState = "track"
