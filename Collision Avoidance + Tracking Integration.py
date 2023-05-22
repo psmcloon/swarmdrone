@@ -21,6 +21,7 @@ L = 26 #Pin
 R = 6 #Pin
 B = 16 #Pin
 sleepdur = 0.05
+notdetect = 0
 
 def getpose(data):
 	translation = [[]]
@@ -108,6 +109,7 @@ def track(GR_Dist, GR_HDNG, position):
   move to april tag location
   if obscured - go to collisionavoidance
   """
+  notdetect = 0
   NextState = "track"
   #print("dist: ", GR_Dist, "hdg: ", GR_HDNG)
   tol = 0.05
@@ -115,7 +117,7 @@ def track(GR_Dist, GR_HDNG, position):
     print("Transition to Apriltag Search")
     NextState = "notdetected"
     return NextState
-  elif distance(F) <= 0.75*droneLength
+  elif distance(F) <= 0.75*droneLength:
     print("Transition to Collision Avoidance")
     NextState = "avoid"
     return NextState
@@ -204,26 +206,27 @@ def notdetected():
   If tag is not detected for 20 seconds, transition to landing state.
   """
 
-  for x in range(40):
+  if notdetect < 40
+    notdetect = notdetect + 1
     time.sleep(0.5)
-    position[2] = 0
 
     # Mavlink command
     print('hold position')
-
-    # search for april tag
-    
 
     if position[2] != 0:
       NextState = "track"
       return NextState
 
-    print('transition to landing state')
     NextState = "notdetected"
     return NextState    
-    
+
+  else:
+    print('transition to landing state')
     
 def callback(data):
+  if NextState = "notdetected":
+    position[2] = 0
+    
   GR_Dist, GR_HDNG, position = getpose(data)
 
   if NextState == "track":
