@@ -223,7 +223,6 @@ def notdetected():
     
 def callback(data):
   global NextState
-  global position
     
   GR_Dist, GR_HDNG, position = getpose(data)
 
