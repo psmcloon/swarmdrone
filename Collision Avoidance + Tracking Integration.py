@@ -113,13 +113,17 @@ def track(GR_Dist, GR_HDNG, position):
   """
   notdetect = 0
   NextState = "track"
+
+  MvtCommand = "Start"
+  CurState = "Tracking"	
+
   #print("dist: ", GR_Dist, "hdg: ", GR_HDNG)
   tol = 0.05
   if position[2] == 0:
     print("Transition to Apriltag Search")
     NextState = "notdetected"
     return NextState
-  elif distance(F) <= 0.75*droneLength:
+  elif distance(F) <= droneLength:
     print("Transition to Collision Avoidance")
     NextState = "avoid"
     return NextState
@@ -130,15 +134,19 @@ def track(GR_Dist, GR_HDNG, position):
       #GR_Dist, GR_HDNG, position = getpose(data)
   if GR_HDNG > hdngthresh:
     print("Rotate right ", GR_HDNG)
+    Command = "Rotate Right"
   elif GR_HDNG < -hdngthresh:
     print("Rotate left ", GR_HDNG)
+    Command = "Rotate Left"
 
   if np.absolute(GR_HDNG) <= hdngthresh:
     if GR_Dist > distthresh+tol and position[0] > 0: #Does not account for existence of collision avoidance script yet. Should transition to collision avoidance if an object is detected
       print("Move forward") #may want to set up a waypoint system, i.e saving the dist only at certain points rather than constantly. 
+      Command = "Move Forward"
     elif GR_Dist < distthresh-tol or position[0] < 0:
       print("Move backward")
-  return NextState
+      Command = "Move Backward"
+  return NextState, Command, CurState
 
 
 def avoid():
@@ -150,6 +158,8 @@ def avoid():
   """
 
   NextState = "avoid"
+  CurState = "Collision Avoidence"
+
   front = distance(F) 
   left = distance(L)
   right = distance(R)
@@ -158,11 +168,13 @@ def avoid():
     while front <= droneLength:
       time.sleep(sleepdur)
       print("rotate left 1 degree") # Will rotate continuously until obstacle is no longer detected in path
+      Command = "Rotate Left"
       front = distance(F) # Update while loop condition
   elif right >= droneLength:
     while front <= droneLength:
       time.sleep(sleepdur)
       print("rotate right 1 degree")
+      Command = "Rotate Right"
       front = distance(F) 
   elif rear >= droneLength:
     left = distance(L)
@@ -170,6 +182,7 @@ def avoid():
     while left < droneLength and rear >= droneLength and right < droneLength: # monitoring sides and rear while reversing
       time.sleep(sleepdur)                
       print("move backwards")
+      Command = "Move Backwards"
       left = distance(L) 
       right = distance(R) 
       rear = distance(B)
@@ -177,14 +190,17 @@ def avoid():
       while front < droneLength:
         time.sleep(sleepdur)
         print("rotate left 1 degree")
+	Command = "Rotate Left"
         front = distance(F)
     elif right > droneLength:
       while front < droneLength:
         time.sleep(sleepdur)
         print("rotate right 1 degree")
+	Command = "Rotate Right"
         front = distance(F)
   else:
     print("stuck, transition to landing")
+    Command = "Stuck, Transition to Landing"
   #Consideration made for changing altitude, experimentation required
 
   while (left < droneLength or right < droneLength) and front > droneLength: # Move forward to clear obstacle
@@ -193,9 +209,10 @@ def avoid():
     left = distance(L) # monitor current obstacle
     right = distance(R) # monitor current obstacle
     print("move foward") 
+    Command = "Move Forward"
     print("Transition to tracking")
     NextState = "track"
-  return NextState
+  return NextState, Command, CurState
 
     
 def notdetected():
@@ -212,22 +229,28 @@ def notdetected():
 
     # Mavlink command
     print('hold position')
+    Command = "Hold Position"
+    CurState = "Tag Not Detected"
 
     if position[2] != 0:
       NextState = "track"
       return NextState
 
     NextState = "notdetected"
-    return NextState    
+    return NextState, Command, CurState    
 
   else:
     print('transition to landing state')
+    Command = "Transition to Landing"
     
 def callback(data):
   global NextState
-
     
   GR_Dist, GR_HDNG, position = getpose(data)
+  NextState, Command, CurState = notdetected()
+  NextState, Command, CurState = avoid()
+  NextState, Command, CurState = track()
+	
 
   if NextState == "track":
     NextState = track(GR_Dist, GR_HDNG, position)
@@ -247,17 +270,17 @@ def callback(data):
   free = (120,230,100) # green
 
   # color edits
-  if right < trigger_dist: color_right = blocked
+  if right < droneLength: color_right = blocked
   else: color_right = free
-  if left < trigger_dist: color_left = blocked
+  if left < droneLength: color_left = blocked
   else: color_left = free
-  if rear < trigger_dist: color_rear = blocked
+  if rear < droneLength: color_rear = blocked
   else: color_rear = free  
-  if front < trigger_dist: color_front = blocked
+  if front < droneLength: color_front = blocked
   else: color_front = free
-  if top < trigger_dist: color_top = blocked
+  if top < droneLength: color_top = blocked
   else: color_top = free  
-  if bottom < trigger_dist: color_bottom = blocked
+  if bottom < droneLength: color_bottom = blocked
   else: color_bottom = free
 	
   # reference points
@@ -310,9 +333,9 @@ def callback(data):
   text_edge = int(0.05*RGB_top.shape[0])
   plt.text(text_edge, text_edge, 'Top View', horizontalalignment='left',verticalalignment='top',size = 7)
   plt.text(window+text_edge, text_edge, 'Rear View', horizontalalignment='left',verticalalignment='top',size = 7)
-  plt.text(text_edge, int(window+0.5*textbar), "Command: "+command, horizontalalignment='left',verticalalignment='center',size = 7)
-  plt.text(text_edge, int(window+1.5*textbar), "AprilTag Coordinates: "+"("+str(tag_x)+" mm, "+str(tag_y)+" mm, "+str(tag_z)+" mm)", horizontalalignment='left',verticalalignment='center',size = 7)
-  plt.text(text_edge, int(window+2.5*textbar), "State: "+state, horizontalalignment='left',verticalalignment='center',size = 7)
+  plt.text(text_edge, int(window+0.5*textbar), "Command: "+Command, horizontalalignment='left',verticalalignment='center',size = 7)
+  plt.text(text_edge, int(window+1.5*textbar), "AprilTag Coordinates: "+"("+str(np.round(position[0],2))+" mm, "+str(np.round(position[1],2))+" mm, "+str(np.round(position[2],2))+" mm)", horizontalalignment='left',verticalalignment='center',size = 7)
+  plt.text(text_edge, int(window+2.5*textbar), "State: "+CurState, horizontalalignment='left',verticalalignment='center',size = 7)
 
   # direction label top view
   plt.text(top_center[0], top_center[1] - (rnge[0]+5), 'Front', horizontalalignment='center',verticalalignment='bottom',size = 5,color=[0.3,0.3,0.3])
