@@ -147,6 +147,7 @@ def avoid():
   revert to tracking
   """
 
+  NextState = "avoid"
   front = distance(F) 
   left = distance(L)
   right = distance(R)
@@ -190,9 +191,8 @@ def avoid():
     left = distance(L) # monitor current obstacle
     right = distance(R) # monitor current obstacle
     print("move foward") 
-    print("Transition to tracking")   
- # GPIO.cleanup()
-  NextState = "track"
+    print("Transition to tracking")
+    NextState = "track"
   return NextState
 
     
