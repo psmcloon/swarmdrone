@@ -6,6 +6,8 @@ from scipy.spatial.transform import Rotation as Rot
 import numpy as np
 import RPi.GPIO as GPIO
 import time
+import cv2
+import matplotlib.pyplot as plt
 
 # GPIO Modus (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
@@ -234,6 +236,143 @@ def callback(data):
   elif NextState == "notdetected":
     NextState = notdetected()
     
+  ### start of display code in callback
+  # create blank
+  textbar = int(0.2*(0.9*RGB_top.shape[0]));
+  window = int(2.5*RGB_top.shape[0])
+  blank = 255 * np.ones(shape=[window+3*textbar+1, 2*window+1, 3], dtype=np.uint8)
+  plt.axis('off') # turn of axes for design
+  # colors
+  blocked = (240,80,90) # red
+  free = (120,230,100) # green
+
+  # color edits
+  if right < trigger_dist: color_right = blocked
+  else: color_right = free
+  if left < trigger_dist: color_left = blocked
+  else: color_left = free
+  if rear < trigger_dist: color_rear = blocked
+  else: color_rear = free  
+  if front < trigger_dist: color_front = blocked
+  else: color_front = free
+  if top < trigger_dist: color_top = blocked
+  else: color_top = free  
+  if bottom < trigger_dist: color_bottom = blocked
+  else: color_bottom = free
+	
+  # reference points
+  top_center = (int(0.5*window),int(0.5*window))
+  top_left = int(top_center[0]-0.5*RGB_top.shape[0])
+  top_right = int(top_center[0]+0.5*RGB_top.shape[0])
+  top_top = int(top_center[1]-0.5*RGB_top.shape[1])
+  top_bottom = int(top_center[1]+0.5*RGB_top.shape[1])
+  front_center = (int(0.5*window-0.5*RGB_front.shape[0]),int(1.5*window)) # format (y,x) change to fit format
+  front_left = int(front_center[0]-0.5*RGB_front.shape[0])
+  front_right = int(front_center[0]+0.5*RGB_front.shape[0])
+  front_top = int(front_center[1]-0.5*RGB_front.shape[1])
+  front_bottom = int(front_center[1]+0.5*RGB_front.shape[1])
+
+  # colored flags
+  rnge = (int(0.9*RGB_top.shape[0]),int(0.9*RGB_top.shape[0]))
+  edge = int(0.05*RGB_top.shape[0])
+  front_center = (front_center[1],front_center[0])
+  align_offset = int(0.5*(RGB_top.shape[0]-RGB_front.shape[0]))
+
+  # colored wedges and white rectangle top view
+  cv2.ellipse(blank,top_center,rnge,0,-20,20,color_right,-1)
+  cv2.ellipse(blank,top_center,rnge,90,-20,20,color_rear,-1)
+  cv2.ellipse(blank,top_center,rnge,180,-20,20,color_left,-1)
+  cv2.ellipse(blank,top_center,rnge,270,-20,20,color_front,-1)
+  cv2.rectangle(blank,(top_left-edge,top_top-edge),(top_right+edge,top_bottom+edge),(255,255,255),-1)
+  # colored wedges and white rectangle rear view
+  cv2.ellipse(blank,front_center,rnge,0,-20,20,color_right,-1)
+  cv2.ellipse(blank,(front_center[0],front_center[1]-align_offset),rnge,90,-20,20,color_bottom,-1)
+  cv2.ellipse(blank,front_center,rnge,180,-20,20,color_left,-1)
+  cv2.ellipse(blank,(front_center[0],front_center[1]+align_offset),rnge,270,-20,20,color_top,-1)
+  cv2.rectangle(blank,(front_top-edge,front_left-edge),(front_bottom+edge,front_right+edge),(255,255,255),-1)
+	
+  # insert top down drone image
+  blank[top_left:top_right, top_top:top_bottom,:] = RGB_top[0:RGB_top.shape[0],0:RGB_top.shape[1],:]
+  # insert front view drone image
+  blank[front_left:front_right, front_top:front_bottom,:] = RGB_front[0:RGB_front.shape[0],0:RGB_front.shape[1],:]
+
+  # boarder rectangles
+  cv2.rectangle(blank,(2,2),(window,window),(0,0,0),thickness = 1)
+  cv2.rectangle(blank,(window,2),(2*window,window),(0,0,0),thickness = 1)
+  cv2.rectangle(blank,(2,window),(2*window,window+textbar),(0,0,0),thickness = 1)
+  cv2.rectangle(blank,(2,window+textbar),(2*window,window+2*textbar),(0,0,0),thickness = 1)
+  cv2.rectangle(blank,(2,window+2*textbar),(2*window,window+3*textbar),(0,0,0),thickness = 1)
+	
+  # command tree connections, may need help navigating functions
+  ### CODE IS INCOMPLETE NEED TO ADD CONNECTIONS HERE
+
+  # explanatory text
+  text_edge = int(0.05*RGB_top.shape[0])
+  plt.text(text_edge, text_edge, 'Top View', horizontalalignment='left',verticalalignment='top',size = 7)
+  plt.text(window+text_edge, text_edge, 'Rear View', horizontalalignment='left',verticalalignment='top',size = 7)
+  plt.text(text_edge, int(window+0.5*textbar), "Command: "+command, horizontalalignment='left',verticalalignment='center',size = 7)
+  plt.text(text_edge, int(window+1.5*textbar), "AprilTag Coordinates: "+"("+str(tag_x)+" mm, "+str(tag_y)+" mm, "+str(tag_z)+" mm)", horizontalalignment='left',verticalalignment='center',size = 7)
+  plt.text(text_edge, int(window+2.5*textbar), "State: "+state, horizontalalignment='left',verticalalignment='center',size = 7)
+
+  # direction label top view
+  plt.text(top_center[0], top_center[1] - (rnge[0]+5), 'Front', horizontalalignment='center',verticalalignment='bottom',size = 5,color=[0.3,0.3,0.3])
+  plt.text(top_center[0], top_center[1] + (rnge[0]+5), 'Rear', horizontalalignment='center',verticalalignment='top',size = 5,color=[0.3,0.3,0.3])
+  plt.text(top_center[0] - (rnge[0]+5), top_center[1], 'Left', horizontalalignment='right',verticalalignment='center',size = 5,color=[0.3,0.3,0.3])
+  plt.text(top_center[0] + (rnge[0]+5), top_center[1], 'Right', horizontalalignment='left',verticalalignment='center',size = 5,color=[0.3,0.3,0.3])
+
+  # friction label front view
+  plt.text(front_center[0],front_center[1]-(rnge[0]+5)+int(0.5*(RGB_top.shape[0]-RGB_front.shape[0])), 'Top', horizontalalignment='center',verticalalignment='bottom',size = 5,color=[0.3,0.3,0.3])
+  plt.text(front_center[0],front_center[1]+(rnge[0]+5)-int(0.5*(RGB_top.shape[0]-RGB_front.shape[0])), 'Bottom', horizontalalignment='center',verticalalignment='top',size = 5,color=[0.3,0.3,0.3])
+  plt.text(front_center[0] - (rnge[0]+5), front_center[1], 'Left', horizontalalignment='right',verticalalignment='center',size = 5,color=[0.3,0.3,0.3])
+  plt.text(front_center[0] + (rnge[0]+5), front_center[1], 'Right', horizontalalignment='left',verticalalignment='center',size = 5,color=[0.3,0.3,0.3])
+
+  # distance reading here
+  # flag distance top text
+  plt.text(top_center[0], top_center[1] - (rnge[0]+5) + 53, read_front, horizontalalignment='center',verticalalignment='bottom',size = 7)
+  plt.text(top_center[0], top_center[1] + (rnge[0]+5) - 53, read_rear, horizontalalignment='center',verticalalignment='top',size = 7)
+  plt.text(top_center[0] - (rnge[0]+5) + 59, top_center[1], read_left, horizontalalignment='right',verticalalignment='center',size = 7)
+  plt.text(top_center[0] + (rnge[0]+5) - 59, top_center[1], read_right, horizontalalignment='left',verticalalignment='center',size = 7)
+
+  # flag distance front text
+  plt.text(front_center[0],front_center[1]-(rnge[0]+5)+56+50, read_top, horizontalalignment='center',verticalalignment='bottom',size = 7)
+  plt.text(front_center[0],front_center[1]+(rnge[0]+5)-56-50, read_bottom, horizontalalignment='center',verticalalignment='top',size = 7)
+  plt.text(front_center[0] - (rnge[0]+5)+59, front_center[1], read_left, horizontalalignment='right',verticalalignment='center',size = 7)
+  plt.text(front_center[0] + (rnge[0]+5)-59, front_center[1], read_right, horizontalalignment='left',verticalalignment='center',size = 7)
+
+  # tag bound management
+  if position[0] <= 1000 and position[0] >= -1000:
+      top_fr = position[0]/5
+  elif position[0] > 1000:
+      top_fr = 1000
+  elif position[0] < -1000:
+      top_fr = -1000
+  else:
+      top_fr = 0
+    
+  if position[1] <= 1000 and position[1] >= -1000:
+      top_rl = position[1]/5
+  elif position[1] > 1000:
+      top_rl = 1000
+  elif position[1] < -1000:
+      top_rl = -1000
+  else:
+      top_rl = 0
+
+  if position[2] >= -1200 and position[2] <= 0:
+      front_tb = position[2]/5
+  elif position[2] < -1200:
+      front_tb = -1200
+  else:
+      front_tb = 0
+
+  plt.plot(top_rl+top_center[0], -top_fr+top_center[1], marker="s", markersize=15, markeredgecolor="white",markeredgewidth=1.5, markerfacecolor=[1,0.9,0])
+  plt.plot(top_rl+front_center[0], -front_tb+front_center[1], marker="s", markersize=15, markeredgecolor="white", markeredgewidth=1.5, markerfacecolor=[1,0.9,0])
+  plt.text(top_rl+top_center[0], -top_fr+top_center[1], "Tag", horizontalalignment='center',verticalalignment='center',size = 7,color="black")
+  plt.text(top_rl+front_center[0], -front_tb+front_center[1], "Tag", horizontalalignment='center',verticalalignment='center',size = 7,color="black")
+
+  plt.imshow(blank)
+  plt.show()
+### end of display code in callback
     
 def listener():
 	rospy.init_node('listener', anonymous=True)
