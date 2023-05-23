@@ -17,10 +17,13 @@ GPIO.setmode(GPIO.BCM)
 distthresh = 0.1 #+ offset #Distance threshold, possibly can be increased if drone is stuck, remove offset
 hdngthresh = 0.1
 droneLength = 0.1 #meters
-F = 17 #Pin 
-L = 26 #Pin
-R = 6 #Pin
-B = 16 #Pin
+F = 17 #Pin front
+L = 26 #Pin left
+R = 6 #Pin right
+B = 16 #Pin back
+T = 5 #Pin top
+Btm = 27 #Pin bottom
+
 sleepdur = 0.05
 notdetect = 0
 NextState = "track"
@@ -29,8 +32,8 @@ def getpose(data):
 	translation = [[]]
 	rotation = [[]]
 	
-	Dist = []
-	HDNG = []
+	Dist = 0
+	HDNG = 0
 	position = [[]]
 
 	for detection in data.detections:
@@ -114,24 +117,34 @@ def track(GR_Dist, GR_HDNG, position):
   notdetect = 0
   NextState = "track"
 
-  MvtCommand = "Start"
+  Command = "Start"
   CurState = "Tracking"	
+  
+  front = distance(F) 
+  left = distance(L)
+  right = distance(R)
+  rear = distance(B)
+  top = distance(T)
+  bottom = distance(Btm)
 
   #print("dist: ", GR_Dist, "hdg: ", GR_HDNG)
   tol = 0.05
-  if position[2] == 0:
+  
+  if any(position) == False:
     print("Transition to Apriltag Search")
     NextState = "notdetected"
-    return NextState
-  elif distance(F) <= droneLength:
+    return NextState, Command, CurState, front, left, right, rear, top, bottom
+    
+  elif front <= droneLength:
     print("Transition to Collision Avoidance")
     NextState = "avoid"
-    return NextState
+    return NextState, Command, CurState, front, left, right, rear, top, bottom
      
   #This current iteration does not account for the existence of the collision avoidance model.
   #Goal is to set heading equal to zero - likely through some form of PID control
   #while np.absolute(GR_HDNG) > 0.5: #Some consideration could be made for acceptable heading threshold/pid control
       #GR_Dist, GR_HDNG, position = getpose(data)
+      
   if GR_HDNG > hdngthresh:
     print("Rotate right ", GR_HDNG)
     Command = "Rotate Right"
@@ -146,7 +159,7 @@ def track(GR_Dist, GR_HDNG, position):
     elif GR_Dist < distthresh-tol or position[0] < 0:
       print("Move backward")
       Command = "Move Backward"
-  return NextState, Command, CurState
+  return NextState, Command, CurState, front, left, right, rear, top, bottom
 
 
 def avoid():
@@ -164,6 +177,9 @@ def avoid():
   left = distance(L)
   right = distance(R)
   rear = distance(B)
+  top = distance(T)
+  bottom = distance(Btm)
+  
   if left >= droneLength:
     while front <= droneLength:
       time.sleep(sleepdur)
@@ -190,13 +206,13 @@ def avoid():
       while front < droneLength:
         time.sleep(sleepdur)
         print("rotate left 1 degree")
-	Command = "Rotate Left"
+        Command = "Rotate Left"
         front = distance(F)
     elif right > droneLength:
       while front < droneLength:
         time.sleep(sleepdur)
         print("rotate right 1 degree")
-	Command = "Rotate Right"
+        Command = "Rotate Right"
         front = distance(F)
   else:
     print("stuck, transition to landing")
@@ -208,20 +224,31 @@ def avoid():
     front = distance(F) # Used to detect if there are additional obstacles in front
     left = distance(L) # monitor current obstacle
     right = distance(R) # monitor current obstacle
+    rear = distance(B)
+    top = distance(T)
+    bottom = distance(Btm)
+    
     print("move foward") 
     Command = "Move Forward"
     print("Transition to tracking")
     NextState = "track"
-  return NextState, Command, CurState
+  return NextState, Command, CurState, front, left, right, rear, top, bottom
 
     
-def notdetected():
+def notdetected(notdetect,position):
   """
   TAG NOT DETECTED PLAN:
   wait for 20 seconds, checking for tag once every second.
   If tag is detected, transition to tracking state immediately.
   If tag is not detected for 20 seconds, transition to landing state.
   """
+
+  front = distance(F) 
+  left = distance(L)
+  right = distance(R)
+  rear = distance(B)
+  top = distance(T)
+  bottom = distance(Btm)
 
   if notdetect < 40:
     notdetect = notdetect + 1
@@ -233,11 +260,12 @@ def notdetected():
     CurState = "Tag Not Detected"
 
     if position[2] != 0:
+      notdetect = 0
       NextState = "track"
-      return NextState
+      return NextState, Command, CurState, front, left, right, rear, top, bottom  
 
     NextState = "notdetected"
-    return NextState, Command, CurState    
+    return NextState, Command, CurState, front, left, right, rear, top, bottom  
 
   else:
     print('transition to landing state')
@@ -246,21 +274,25 @@ def notdetected():
 def callback(data):
   global NextState
     
-  position = [0, 0, 0]
   GR_Dist, GR_HDNG, position = getpose(data)
-  NextState, Command, CurState = notdetected()
-  NextState, Command, CurState = avoid()
-  NextState, Command, CurState = track()
+  if any(position) == False:
+  	position = np.array([0, 0, 0])
 	
-
   if NextState == "track":
-    NextState = track(GR_Dist, GR_HDNG, position)
+    NextState, Command, CurState, front, left, right, rear, top, bottom = track(GR_Dist, GR_HDNG, position)
   elif NextState == "avoid":
-    NextState = avoid()
+    NextState, Command, CurState, front, left, right, rear, top, bottom = avoid()
   elif NextState == "notdetected":
-    NextState = notdetected()
+    NextState, Command, CurState, front, left, right, rear, top, bottom = notdetected(notdetect,position)
     
   ### start of display code in callback
+  # import drone images
+
+  top_img = cv2.imread(r'/opt/ros/noetic/share/apriltag_ros/DroneTop2.jpeg')
+  RGB_top = cv2.cvtColor(top_img,cv2.COLOR_BGR2RGB)
+  front_img = cv2.imread(r'/opt/ros/noetic/share/apriltag_ros/DroneRear.jpg')
+  RGB_front = cv2.cvtColor(front_img,cv2.COLOR_BGR2RGB)
+
   # create blank
   textbar = int(0.2*(0.9*RGB_top.shape[0]));
   window = int(2.5*RGB_top.shape[0])
@@ -352,16 +384,16 @@ def callback(data):
 
   # distance reading here
   # flag distance top text
-  plt.text(top_center[0], top_center[1] - (rnge[0]+5) + 53, read_front, horizontalalignment='center',verticalalignment='bottom',size = 7)
-  plt.text(top_center[0], top_center[1] + (rnge[0]+5) - 53, read_rear, horizontalalignment='center',verticalalignment='top',size = 7)
-  plt.text(top_center[0] - (rnge[0]+5) + 59, top_center[1], read_left, horizontalalignment='right',verticalalignment='center',size = 7)
-  plt.text(top_center[0] + (rnge[0]+5) - 59, top_center[1], read_right, horizontalalignment='left',verticalalignment='center',size = 7)
+  plt.text(top_center[0], top_center[1] - (rnge[0]+5) + 53, front, horizontalalignment='center',verticalalignment='bottom',size = 7)
+  plt.text(top_center[0], top_center[1] + (rnge[0]+5) - 53, rear, horizontalalignment='center',verticalalignment='top',size = 7)
+  plt.text(top_center[0] - (rnge[0]+5) + 59, top_center[1], left, horizontalalignment='right',verticalalignment='center',size = 7)
+  plt.text(top_center[0] + (rnge[0]+5) - 59, top_center[1], right, horizontalalignment='left',verticalalignment='center',size = 7)
 
   # flag distance front text
-  plt.text(front_center[0],front_center[1]-(rnge[0]+5)+56+50, read_top, horizontalalignment='center',verticalalignment='bottom',size = 7)
-  plt.text(front_center[0],front_center[1]+(rnge[0]+5)-56-50, read_bottom, horizontalalignment='center',verticalalignment='top',size = 7)
-  plt.text(front_center[0] - (rnge[0]+5)+59, front_center[1], read_left, horizontalalignment='right',verticalalignment='center',size = 7)
-  plt.text(front_center[0] + (rnge[0]+5)-59, front_center[1], read_right, horizontalalignment='left',verticalalignment='center',size = 7)
+  plt.text(front_center[0],front_center[1]-(rnge[0]+5)+56+50, top, horizontalalignment='center',verticalalignment='bottom',size = 7)
+  plt.text(front_center[0],front_center[1]+(rnge[0]+5)-56-50, bottom, horizontalalignment='center',verticalalignment='top',size = 7)
+  plt.text(front_center[0] - (rnge[0]+5)+59, front_center[1], left, horizontalalignment='right',verticalalignment='center',size = 7)
+  plt.text(front_center[0] + (rnge[0]+5)-59, front_center[1], right, horizontalalignment='left',verticalalignment='center',size = 7)
 
   # tag bound management
   if position[0] <= 1000 and position[0] >= -1000:
