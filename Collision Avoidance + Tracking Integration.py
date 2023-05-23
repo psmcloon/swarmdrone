@@ -246,6 +246,7 @@ def notdetected():
 def callback(data):
   global NextState
     
+  position = [0, 0, 0]
   GR_Dist, GR_HDNG, position = getpose(data)
   NextState, Command, CurState = notdetected()
   NextState, Command, CurState = avoid()
